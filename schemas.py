@@ -11,38 +11,56 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, HttpUrl
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# ----------------------
+# Portfolio App Schemas
+# ----------------------
 
+class SocialLink(BaseModel):
+    label: str = Field(..., description="Platform name, e.g., GitHub")
+    url: HttpUrl
+    icon: Optional[str] = Field(None, description="Lucide icon name, e.g., github")
+
+class Portfolio(BaseModel):
+    """
+    Portfolio settings (single-document collection)
+    Collection name: "portfolio"
+    """
+    hero_title: str = Field("Hey, I'm Alex — Creative Developer", description="Main headline")
+    hero_subtitle: str = Field("I build playful, interactive web experiences.", description="Secondary headline")
+    about: str = Field(
+        "I love crafting modern, interactive interfaces that feel alive."
+    )
+    socials: List[SocialLink] = Field(default_factory=list)
+
+class Project(BaseModel):
+    """
+    Projects collection
+    Collection name: "project"
+    """
+    title: str
+    description: str
+    tags: List[str] = Field(default_factory=list)
+    image_url: Optional[str] = None
+    link: Optional[str] = None
+    featured: bool = False
+    order: int = 0
+
+# Example schemas retained for reference (not used by the app):
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    name: str
+    email: str
+    address: str
+    age: Optional[int] = None
+    is_active: bool = True
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    title: str
+    description: Optional[str] = None
+    price: float
+    category: str
+    in_stock: bool = True
 
-# Add your own schemas here:
-# --------------------------------------------------
-
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+# Note: The Flames database viewer can read these via GET /schema if implemented.
